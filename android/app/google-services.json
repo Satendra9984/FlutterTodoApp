@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "749250022036",
+    "project_id": "ivycontactsapp",
+    "storage_bucket": "ivycontactsapp.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:749250022036:android:a09992b233cc13ad530281",
+        "android_client_info": {
+          "package_name": "com.example.ivy_contacts_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBo8Ri8xDry6gIbVYajRAKJBhxfH39yObU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
