@@ -1,30 +1,30 @@
-part of 'contact_cubit.dart';
+part of 'todo_cubit.dart';
 
-class ContactState extends Equatable {
+class TodoState extends Equatable {
   final LoadState? loadState;
-  final List<ContactModel> listContactModel;
+  final List<TodoModel> listTodoModel;
   final LoadState? addLoadState;
   final LoadState? editLoadState;
   final LoadState? deleteLoadState;
 
-  const ContactState({
+  const TodoState({
     this.loadState,
-    required this.listContactModel,
+    required this.listTodoModel,
     this.addLoadState,
     this.editLoadState,
     this.deleteLoadState,
   });
 
-  ContactState copyWith({
+  TodoState copyWith({
     LoadState? loadState,
-    List<ContactModel>? listContactModel,
+    List<TodoModel>? listTodoModel,
     LoadState? addLoadState,
     LoadState? editLoadState,
     LoadState? deleteLoadState,
   }) {
-    return ContactState(
+    return TodoState(
       loadState: loadState ?? this.loadState,
-      listContactModel: listContactModel ?? this.listContactModel,
+      listTodoModel: listTodoModel ?? this.listTodoModel,
       addLoadState: addLoadState ?? this.addLoadState,
       editLoadState: editLoadState ?? this.editLoadState,
       deleteLoadState: deleteLoadState ?? this.deleteLoadState,
@@ -34,7 +34,7 @@ class ContactState extends Equatable {
   @override
   List<Object?> get props => [
         loadState,
-        listContactModel,
+        listTodoModel,
         addLoadState,
         editLoadState,
         deleteLoadState,

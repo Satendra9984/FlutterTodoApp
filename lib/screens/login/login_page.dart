@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ivy_contacts_app/utils/colors.dart';
 
-import '../../app_services/database/shared_pref_services.dart';
+import '../../app_services/shared_pref_services.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/submit_button.dart';
 import '../../widgets/text_input.dart';

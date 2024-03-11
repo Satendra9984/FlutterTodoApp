@@ -2,27 +2,24 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ivy_contacts_app/screens/contacts/bloc/contact_cubit.dart';
-import 'package:ivy_contacts_app/screens/contacts/views/add_contact.dart';
-import 'package:ivy_contacts_app/screens/contacts/views/edit_contact.dart';
-import 'package:ivy_contacts_app/screens/contacts/views/view_contact.dart';
+import 'package:ivy_contacts_app/models/todo_model.dart';
+import 'package:ivy_contacts_app/screens/todos/bloc/todo_cubit.dart';
+import 'package:ivy_contacts_app/screens/todos/views/add_todo.dart';
+import 'package:ivy_contacts_app/screens/todos/views/edit_todo.dart';
 import 'package:ivy_contacts_app/utils/app_functions.dart';
-import 'package:url_launcher/url_launcher.dart';
-
-import '../../../models/contact_model.dart';
 import '../../../utils/colors.dart';
 
-class HomeScreen extends StatefulWidget {
-  HomeScreen({Key? key}) : super(key: key);
+class TodoListScreen extends StatefulWidget {
+  const TodoListScreen({Key? key}) : super(key: key);
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  State<TodoListScreen> createState() => _TodoListScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _TodoListScreenState extends State<TodoListScreen> {
   @override
   void initState() {
-    context.read<ContactCubit>().initialiseList();
+    context.read<TodoCubit>().initialiseList();
     super.initState();
   }
 
@@ -30,8 +27,11 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
 
-    return BlocConsumer<ContactCubit, ContactState>(
-      listener: (context, state) {},
+    return BlocConsumer<TodoCubit, TodoState>(
+      listener: (context, state) {
+        debugPrint(
+            '[loadstate]: ${state.loadState}\t${state.listTodoModel.length}');
+      },
       builder: (context, state) {
         if (state.loadState == LoadState.initial ||
             state.loadState == LoadState.loading) {
@@ -45,16 +45,50 @@ class _HomeScreenState extends State<HomeScreen> {
             elevation: 0.5,
             centerTitle: true,
             title: Text(
-              'My Contacts',
+              'My Todos',
               style: TextStyle(
                   color: Colors.grey.shade800,
                   fontSize: 18,
                   fontWeight: FontWeight.w600),
             ),
+            actions: [
+              PopupMenuButton(
+                itemBuilder: (context) {
+                  return <PopupMenuEntry>[
+                    PopupMenuItem(
+                      onTap: () {
+                        context.read<TodoCubit>().sortCompleted();
+                      },
+                      child: Text(
+                        'Completed',
+                        style: TextStyle(
+                          color: Colors.grey.shade800,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    PopupMenuItem(
+                      onTap: () {
+                        context.read<TodoCubit>().sortInCompleted();
+                      },
+                      child: Text(
+                        'In-Completed',
+                        style: TextStyle(
+                          color: Colors.grey.shade800,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ];
+                },
+              ),
+            ],
           ),
           floatingActionButton: FloatingActionButton(
             onPressed: () {
-              navigatePush(context, AddContact());
+              navigatePush(context, const AddTodo());
             },
             backgroundColor: const Color(0xFF29AB87),
             child: const Icon(
@@ -65,7 +99,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           body: RefreshIndicator(
             onRefresh: () {
-              return context.read<ContactCubit>().initialiseList();
+              return context.read<TodoCubit>().initialiseList();
             },
             color: tropicalRainforestGreen,
             child: Container(
@@ -77,55 +111,24 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: ListView.builder(
                       physics: const BouncingScrollPhysics(
                           parent: AlwaysScrollableScrollPhysics()),
-                      itemCount: state.listContactModel.length,
+                      itemCount: state.listTodoModel.length,
                       itemBuilder: (ctx, index) {
-                        ContactModel cm = state.listContactModel[index];
+                        TodoModel cm = state.listTodoModel[index];
                         return ListTile(
                           onTap: () {
-                            navigatePush(context,
-                                EditContact(contactModel: cm, index: index));
+                            navigatePush(context, EditTodo(todoModel: cm));
                           },
-                          leading: ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: SizedBox(
-                              height: 45,
-                              width: 45,
-                              child: Icon(
-                                Icons.ac_unit,
-                                size: 35,
-                                color: jungleGreen,
-                              ),
-                            ),
+                          leading: CircleAvatar(
+                            radius: 15.0,
+                            backgroundColor:
+                                cm.completed ? Colors.green : Colors.red,
                           ),
                           title: Text(
-                            cm.name,
+                            cm.title,
                             style: TextStyle(
                               color: Colors.grey.shade800,
                               fontSize: 18,
                               fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          subtitle: Text(
-                            '+91 ${cm.contactNo}',
-                            style: TextStyle(
-                              color: Colors.grey.shade800,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
-                          trailing: IconButton(
-                            onPressed: () async {
-                              /// MAKE THE CALL
-                              final call = Uri.parse('tel:+91 ${cm.contactNo}');
-                              if (await canLaunchUrl(call)) {
-                                launchUrl(call);
-                              } else {
-                                throw 'Could not launch $call';
-                              }
-                            },
-                            icon: const Icon(
-                              Icons.phone,
-                              color: Color(0xFF00755E),
                             ),
                           ),
                         );
@@ -291,7 +294,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: RefreshIndicator(
         onRefresh: () {
-          return context.read<ContactCubit>().initialiseList();
+          return context.read<TodoCubit>().initialiseList();
         },
         color: tropicalRainforestGreen,
         child: Center(

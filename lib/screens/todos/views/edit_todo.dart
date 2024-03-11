@@ -1,41 +1,34 @@
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ivy_contacts_app/models/todo_model.dart';
 import 'package:ivy_contacts_app/utils/app_functions.dart';
-
-import '../../../models/contact_model.dart';
-import '../../../widgets/get_profile_image.dart';
 import '../../../widgets/submit_button.dart';
 import '../../../widgets/text_input.dart';
-import '../bloc/contact_cubit.dart';
+import '../bloc/todo_cubit.dart';
 
-class EditContact extends StatefulWidget {
-  final ContactModel contactModel;
-  final int index;
-  EditContact({required this.contactModel, required this.index, Key? key})
-      : super(key: key);
+class EditTodo extends StatefulWidget {
+  final TodoModel todoModel;
+  const EditTodo({required this.todoModel, Key? key}) : super(key: key);
 
   @override
-  State<EditContact> createState() => _EditContactState();
+  State<EditTodo> createState() => _EditTodoState();
 }
 
-class _EditContactState extends State<EditContact> {
-  final TextEditingController _phoneController = TextEditingController();
-  final TextEditingController _nameController = TextEditingController();
+class _EditTodoState extends State<EditTodo> {
+  final TextEditingController _titleController = TextEditingController();
+  bool _completed = false;
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
-  Uint8List? imageData;
 
   @override
   void initState() {
-    _phoneController.text = widget.contactModel.contactNo;
-    _nameController.text = widget.contactModel.name;
+    _titleController.text = widget.todoModel.title;
+    _completed = widget.todoModel.completed;
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<ContactCubit, ContactState>(listener: (context, state) {
+    return BlocConsumer<TodoCubit, TodoState>(listener: (context, state) {
       if (state.editLoadState == LoadState.errorLoading) {
         ScaffoldMessenger.of(context).showSnackBar(getSnackbar(
             Colors.redAccent.shade400,
@@ -52,7 +45,7 @@ class _EditContactState extends State<EditContact> {
       }
       if (state.deleteLoadState == LoadState.loaded) {
         ScaffoldMessenger.of(context).showSnackBar(
-            getSnackbar(Colors.green, "Successfully Deleted Contact"));
+            getSnackbar(Colors.green, "Successfully Deleted Todo"));
       }
     }, builder: (context, state) {
       return Scaffold(
@@ -75,8 +68,8 @@ class _EditContactState extends State<EditContact> {
             IconButton(
               onPressed: () async {
                 await context
-                    .read<ContactCubit>()
-                    .deleteContact(widget.contactModel, widget.index)
+                    .read<TodoCubit>()
+                    .deleteTodo(widget.todoModel)
                     .then((value) {
                   Navigator.pop(context);
                 });
@@ -97,17 +90,20 @@ class _EditContactState extends State<EditContact> {
               margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
               child: SubmitButton(
                 color: const Color(0xFF00755E),
-                text: 'Update Contacts',
+                text: 'Update Todo',
                 onPress: () async {
-                  ContactModel contactModel = ContactModel.fromJson({
-                    "id": widget.contactModel.id,
-                    "name": _nameController.text,
-                    "contactNo": _phoneController.text,
-                    "profilePhoto": "",
+                  if (formKey.currentState?.validate() == false) {
+                    return;
+                  }
+                  TodoModel todoModel = TodoModel({
+                    "id": widget.todoModel.id,
+                    "userId": widget.todoModel.userId,
+                    "title": _titleController.text,
+                    "completed": _completed,
                   });
                   await context
-                      .read<ContactCubit>()
-                      .updateContact(contactModel, widget.index, imageData)
+                      .read<TodoCubit>()
+                      .updateTodo(todoModel)
                       .then((value) {
                     Navigator.pop(context);
                   });
@@ -122,17 +118,8 @@ class _EditContactState extends State<EditContact> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Center(
-                  child: GetProfileImageWidget(
-                    id: widget.contactModel.id,
-                    callBack: (Uint8List? image) {
-                      imageData = image;
-                    },
-                  ),
-                ),
-                const SizedBox(height: 25),
                 Text(
-                  'Name',
+                  'Title',
                   style: TextStyle(
                     color: Colors.grey.shade800,
                     fontSize: 16,
@@ -141,52 +128,41 @@ class _EditContactState extends State<EditContact> {
                 ),
                 const SizedBox(height: 5),
                 CustomTextInput(
-                  controller: _nameController,
-                  text: "Name",
+                  controller: _titleController,
+                  text: "Title",
                   keyboardType: TextInputType.name,
                   password: false,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please Enter the name';
+                      return 'Please Enter the title';
                     }
                     return null;
                   },
                 ),
                 const SizedBox(height: 25),
-                Text(
-                  'Phone Number',
-                  style: TextStyle(
-                    color: Colors.grey.shade800,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 5),
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      '+91 ',
+                      'Completed ',
                       style: TextStyle(
                         color: Colors.grey.shade800,
                         fontSize: 15,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
-                    Expanded(
-                      child: CustomTextInput(
-                        controller: _phoneController,
-                        text: "Phone Number",
-                        keyboardType: TextInputType.number,
-                        password: false,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please Enter mobile number';
-                          } else if (value.length < 10 || value.length > 10) {
-                            return 'Number should be of 10 digits';
-                          }
-                          return null;
-                        },
-                      ),
+                    Switch(
+                      value: _completed,
+                      onChanged: (newval) {
+                        setState(() {
+                          _completed = newval;
+                        });
+                      },
+                      activeTrackColor: Colors.green,
+                      activeColor: Colors.white,
+                      inactiveTrackColor: Colors.red,
+                      inactiveThumbColor: Colors.white,
+                      trackOutlineColor: MaterialStateColor.resolveWith((states) => Colors.white),
                     ),
                   ],
                 ),

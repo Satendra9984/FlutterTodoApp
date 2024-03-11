@@ -6,15 +6,24 @@
 // },
 
 class TodoModel {
+  final int id;
   final String userId;
-  final String id;
   final String title;
   final bool completed;
 
-  TodoModel({
+  TodoModel._({
     required this.id,
     required this.userId,
     required this.title,
     this.completed = false,
   });
+
+  factory TodoModel(Map json) {
+    return TodoModel._(
+      id: json["id"],
+      userId: json["userId"].toString(),
+      title: json["title"],
+      completed: json["completed"],
+    );
+  }
 }

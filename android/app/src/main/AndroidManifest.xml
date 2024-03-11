@@ -30,7 +30,7 @@
         </intent>
     </queries>
     <application
-        android:label="ivy_contacts_app"
+        android:label="FlutterTodoApp"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

@@ -4,7 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../app_services/database/shared_pref_services.dart';
+import '../app_services/shared_pref_services.dart';
 import '../screens/login/otp_page.dart';
 import '../utils/app_functions.dart';
 
